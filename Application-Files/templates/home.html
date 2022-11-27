@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Stock Prediction</title>
+    <link rel="stylesheet" href="../static/css/styles.css">
+</head>
+
+<body>
+    <div class="main">
+        <div class="summary">
+            <div class="left">
+                <select id="currency"></select>
+                <div>Date: {{date}}</div>
+                <div>Price: {{price}}$</div>
+            </div>
+            <div class="right">
+                <div>Prediction:</div>
+                {% if pred[0] == "down" %}
+                <div>1 day: <span class="redarrow">&#8600;</span></div>
+                {% else %}
+                <div>1 day: <span class="greenarrow">&#8599;</span></div>
+                {% endif %}
+                {% if pred[2] == "down" %}
+                <div>3 days: <span class="redarrow">&#8600;</span></div>
+                {% else %}
+                <div>3 days: <span class="greenarrow">&#8599;</span></div>
+                {% endif %}
+                {% if pred[4] == "down" %}
+                <div>5 days: <span class="redarrow">&#8600;</span></div>
+                {% else %}
+                <div>5 days: <span class="greenarrow">&#8599;</span></div>
+                {% endif %}
+                {% if pred[6] == "down" %}
+                <div>7 days: <span class="redarrow">&#8600;</span></div>
+                {% else %}
+                <div>7 days: <span class="greenarrow">&#8599;</span></div>
+                {% endif %}
+            </div>
+        </div>
+        <div id="chartdiv"></div>
+    </div>
+    <div class="main">
+        <div class="summary_img">
+            <div class="left_img">
+                <img src="../static/photos/acc_{{currency_name}}.png">
+            </div>
+            <div class="right_img">
+                <img src="../static/photos/loss_{{currency_name}}.png">
+            </div>
+        </div>    
+    </div>
+</body>
+
+</html>
+
+<script src="https://cdn.amcharts.com/lib/4/core.js"></script>
+<script src="https://cdn.amcharts.com/lib/4/charts.js"></script>
+<script src="https://cdn.amcharts.com/lib/4/themes/animated.js"></script>
+<script>
+
+    function changeCurrency() {
+        const cur = document.querySelector("#currency").value;
+        window.location.href = `/${cur.toLowerCase()}`;
+    }
+
+    window.onload = () => {
+        let currencies = ["Bitcoin", "Ethereum", "Dogecoin"];
+        const dropDown = document.querySelector("#currency");
+        var opt = document.createElement('option');
+        opt.value = "{{currency}}";
+        opt.innerHTML = "{{currency}}";
+        dropDown.appendChild(opt);
+        for (var i = 0; i < currencies.length; i++) {
+            if (currencies[i] != "{{currency}}") {
+                var opt = document.createElement('option');
+                opt.value = currencies[i];
+                opt.innerHTML = currencies[i];
+                dropDown.appendChild(opt);
+            }
+        }
+        dropDown.addEventListener("change", changeCurrency);
+    };
+
+    am4core.ready(function () {
+        am4core.useTheme(am4themes_animated);
+        var chart = am4core.create("chartdiv", am4charts.XYChart);
+        chart.data = {{ data | safe }};
+    var categoryAxis = chart.xAxes.push(new am4charts.CategoryAxis());
+    categoryAxis.dataFields.category = "time";
+    var valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
+    var series = chart.series.push(new am4charts.LineSeries());
+    series.dataFields.valueY = "value";
+    series.dataFields.categoryX = "time";
+    series.name = `${"{{currency}}"} price (USD)`;
+    series.tooltipText = "{categoryX}: [b]{valueY}[/]";
+    series.strokeWidth = 2;
+    chart.legend = new am4charts.Legend();
+    chart.cursor = new am4charts.XYCursor();
+    });
+</script>
